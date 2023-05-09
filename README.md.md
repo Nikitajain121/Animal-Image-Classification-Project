@@ -1,19 +1,7 @@
 
 # ANIMAL IMAGE CLASSIFICATION PROJECT
+Nikita Jain
 
-
-
-
-
-## Team Members
-
-Nikita Jain ABMSD22024(2242854)
-
-Nimisha Malviya ABMSD22003(2242855)
-
-Ridhi Bhatia ABMSD22011(2242857)
-
-Tanuja Jangid ABMSD22025(2242863)
 ## Description of Project
 This Project is to Classify Animal Images Using Machine Learning. We have used Five Categories in this project: Cat, Horse, Elephant, Cow, Chicken. Data came from Animals-10 dataset in kaggle.
 ## Purpose
