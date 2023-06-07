@@ -1,0 +1,42 @@
+from ._anvil_designer import Form1Template
+from anvil import *
+import anvil.server
+
+class Form1(Form1Template):
+  def __init__(self, **properties):
+    # Set Form properties and Data Bindings.
+    self.init_components(**properties)
+
+    # Any code you write here will run before the form opens.
+
+  def primary_color_1_click(self, **event_args):
+    hasil = anvil.server.call("say_hello", self.text_box_1.text)
+    self.label_hasil.text = hasil
+  def file_loader_1_change(self, file, **event_args):
+    """This method is called when a new file is loaded into this FileLoader"""
+    hasil =anvil.server.call("classify_image", file)
+    self.label_hasil.visible= True
+    self.label_hasil.text= hasil
+    self.image_1.source = file
+    self.label_hasil.text = (hasil)
+     
+
+
+  def text_box_1_pressed_enter(self, **event_args):
+    """This method is called when the user presses Enter in this text box"""
+    pass
+
+  def button_1_click(self, **event_args):
+    """This method is called when the button is clicked"""
+    hasil = anvil.server.call("say_hello", self.text_box_1.text)
+    self.label_hasil.text = hasil
+
+  def label_hasil_change(self, file, **event_args):
+    """This method is called when a new file is loaded into this FileLoader"""
+    result = anvil.server.call("classify_image",file)
+    self.label_hasil.text= result
+
+  
+    
+
+
