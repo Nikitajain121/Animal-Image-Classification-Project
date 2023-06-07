@@ -1,0 +1,191 @@
+
+from google.colab import drive
+drive.mount('/content/drive')
+
+import numpy as np
+import pandas as pd
+import tensorflow as tf
+import matplotlib.pyplot as plt
+import seaborn as sns
+import os
+from tensorflow.keras.preprocessing.image import ImageDataGenerator, load_img, img_to_array
+from tensorflow.keras.models import Sequential,Model
+from tensorflow.keras.layers import Conv2D,MaxPooling2D,Dense,GlobalAveragePooling2D,Dropout
+plt.rcParams['font.size']=14
+img_size = 224
+
+img_size = 224
+batch_size = 32
+
+datagen = ImageDataGenerator(rescale=1/255.,
+                            zoom_range=0.2,
+                            horizontal_flip=True,
+                            validation_split=0.15)
+
+
+train_generator = datagen.flow_from_directory('/content/drive/MyDrive/pro/raw-img',
+                                              target_size=(img_size,img_size),
+                                              batch_size=batch_size,
+                                              shuffle=True,
+                                              subset='training',
+                                              #color_mode='grayscale',
+                                              class_mode='categorical')
+val_generator = datagen.flow_from_directory('/content/drive/MyDrive/pro/raw-img',
+                                            target_size=(img_size,img_size),
+                                            batch_size=batch_size,
+                                            shuffle=False,
+                                            subset='validation',
+                                            #color_mode='grayscale',
+                                            class_mode='categorical')
+
+label = [k for k in train_generator.class_indices]
+samples = train_generator.__next__()
+images = samples[0]
+titles = samples[1]
+plt.figure(figsize=(20,20))
+
+for i in range(15):
+    plt.subplot(5,5,i+1)
+    plt.subplots_adjust(hspace=0.3,wspace=0.3)
+    plt.imshow(images[i])
+    plt.title(f"Class: {label[np.argmax(titles[i],axis=0)]}")
+    plt.axis("off")
+
+base_model=tf.keras.applications.vgg16.VGG16(include_top=False,weights='imagenet',input_shape=(img_size,img_size,3))
+
+for layer in base_model.layers[:-4]:
+    layer.trainable = False
+
+last_output = base_model.output
+x = GlobalAveragePooling2D()(last_output)
+x = Dense(512, activation='relu')(x)
+x = Dropout(0.5)(x)
+outputs = Dense(5, activation='softmax')(x)
+model = Model(inputs=base_model.inputs, outputs=outputs)
+model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.0001),
+             loss='categorical_crossentropy',
+             metrics=['accuracy'])
+
+from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping
+model_name = "model99.h5"
+Checkpoint = ModelCheckpoint(model_name, monitor="val_loss", mode="min", save_best_only = True, verbose=1)
+
+es = EarlyStopping(monitor='val_loss',min_delta = 0, patience = 5, restore_best_weights=True)
+
+from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping
+model_name = "model99.h5"
+Checkpoint = ModelCheckpoint(model_name, monitor="val_loss", mode="min", save_best_only = True, verbose=1)
+
+es = EarlyStopping(monitor='val_loss',min_delta = 0, patience = 5, restore_best_weights=True)
+
+history = model.fit(train_generator,epochs=4,validation_data=val_generator,callbacks=[Checkpoint,es])
+
+y_test = val_generator.classes
+y_pred = model.predict(val_generator)
+y_pred = np.argmax(y_pred,axis=1)
+
+from keras.models import save_model
+save_model(model,"model.h5")
+
+plt.figure(figsize=(20,8))
+plt.plot(history.history['accuracy'])
+plt.plot(history.history['val_accuracy'])
+plt.title('model accuracy')
+plt.ylabel('accuracy')
+plt.xlabel('epoch')
+plt.legend(['train', 'val'], loc='upper left')
+plt.show()
+
+
+
+from sklearn.metrics import classification_report, confusion_matrix
+print(classification_report(y_test,y_pred,target_names = label))
+
+import numpy as np
+from PIL import Image
+
+img = Image.open('/content/drive/MyDrive/pro/raw-img/gallina/100.jpeg')
+img = img.resize((224,224))
+img_array = np.array(img)
+img_array = np.expand_dims(img_array,axis=0)
+
+from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
+img_array = preprocess_input(img_array)
+
+pred = model.predict(img_array)
+
+class_idx = np.argmax(pred , axis=1)[0]
+
+class_names = ['horse','elephant','chicken','cat','cow']
+
+class_name = class_names[class_idx]
+
+print('The predicted class is:' , class_name)
+
+img = Image.open('/content/drive/MyDrive/pro/raw-img/gallina/100.jpeg')
+img = img.resize((224,224))
+img_array = np.array(img)
+img_array = np.expand_dims(img_array,axis=0)
+
+pred = model.predict(img_array)
+class_idx = np.argmax(pred , axis=1)[0]
+class_names = ['horse','elephant','chicken','cat','cow']
+class_name = class_names[class_idx]
+print('The predicted class is:' , class_name)
+
+img = Image.open('/content/drive/MyDrive/pro/raw-img/mucca/OIP--FJF1fAEKYhaAYF7cVpHNgHaFj.jpeg')
+img = img.resize((224,224))
+img_array = np.array(img)
+img_array = np.expand_dims(img_array,axis=0)
+
+from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
+img_array = preprocess_input(img_array)
+pred = model.predict(img_array)
+class_idx = np.argmax(pred , axis=1)[0]
+class_names = ['horse','elephant','chicken','cat','cow']
+class_name = class_names[class_idx]
+print('The predicted class is:' , class_name)
+
+img = Image.open('/content/drive/MyDrive/pro/raw-img/gatto/420.jpeg')
+img = img.resize((224,224))
+img_array = np.array(img)
+img_array = np.expand_dims(img_array,axis=0)
+
+from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
+img_array = preprocess_input(img_array)
+pred = model.predict(img_array)
+class_idx = np.argmax(pred , axis=1)[0]
+class_names = ['horse','elephant','chicken','cat','cow']
+class_name = class_names[class_idx]
+print('The predicted class is:' , class_name)
+
+img = Image.open('//content/drive/MyDrive/pro/raw-img/gallina/1054.jpeg')
+img = img.resize((224,224))
+img_array = np.array(img)
+img_array = np.expand_dims(img_array,axis=0)
+
+from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
+img_array = preprocess_input(img_array)
+pred = model.predict(img_array)
+class_idx = np.argmax(pred , axis=1)[0]
+class_names = ['horse','elephant','chicken','cat','cow']
+class_name = class_names[class_idx]
+print('The predicted class is:' , class_name)
+
+img = Image.open('/content/drive/MyDrive/pro/raw-img/elefante/OIP-0SvmYvIvrQp38UQ99X8xQQHaFA.jpeg')
+img = img.resize((224,224))
+img_array = np.array(img)
+img_array = np.expand_dims(img_array,axis=0)
+
+from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
+img_array = preprocess_input(img_array)
+pred = model.predict(img_array)
+class_idx = np.argmax(pred , axis=1)[0]
+class_names = ['horse','elephant','chicken','cat','cow']
+class_name = class_names[class_idx]
+print('The predicted class is:' , class_name)
+
+model.save('My_model.h5')
+
+from keras.models import save_model
+save_model(model,"model.h5")
