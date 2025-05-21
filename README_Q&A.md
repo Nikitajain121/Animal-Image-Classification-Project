@@ -168,4 +168,94 @@ The model is loaded from Google Drive to persist the trained weights and archite
 
 ---
 
+# Top 5 Interview Questions & Answers for Animal Classification Project
+
+---
+
+## 1. What is the main purpose of your Animal Classification project?
+
+**Answer:**  
+The project aims to build an automated system that classifies animal images into predefined categories (horse, elephant, chicken, cat, cow) using a deep learning model. It helps in quick and accurate identification, which can be useful in wildlife monitoring, farming, and educational applications.
+
+---
+
+## 2. How did you train and deploy your model?
+
+**Answer:**  
+I trained a convolutional neural network model (based on MobileNetV2 architecture) using labeled animal images. After training, I saved the model as an `.h5` file on Google Drive. For deployment, I used Google Colab as the backend server to load and run the model and connected it to a web frontend via Anvil Uplink, enabling remote function calls and real-time predictions.
+
+---
+
+## 3. How do you preprocess the images before feeding them to the model?
+
+**Answer:**  
+Input images are resized to 224x224 pixels using OpenCV to match the model input shape. Then, images are converted to NumPy arrays and expanded along the batch dimension. Finally, pixel values are normalized with TensorFlow’s `preprocess_input` to ensure consistency with the data distribution on which the model was trained.
+
+---
+
+## 4. How does your prediction function work?
+
+**Answer:**  
+The prediction function takes a preprocessed image, passes it through the trained model to get prediction probabilities, then selects the class with the highest probability using `np.argmax`. It maps this index to the corresponding animal label and returns the predicted class name.
+
+---
+
+## 5. How did you handle integration between the model backend and the user interface?
+
+**Answer:**  
+I used Anvil’s Uplink to connect the Python backend running on Google Colab with the Anvil web app frontend. Backend functions are exposed via `@anvil.server.callable` decorators, allowing the frontend to send image files, receive predictions, and display results dynamically. Temporary files handle image uploads, ensuring smooth communication and reliable predictions.
+
+## 1. What was the objective or problem your project aimed to solve?
+
+**Answer:**  
+The primary objective of my project was to develop an automated image classification system capable of identifying different types of animals from images. This system can be used in various real-world applications, such as wildlife conservation, farming, and educational tools, where quick and accurate recognition of animal species is important. The project aimed to leverage deep learning techniques to build a model that can generalize well to new images and deliver predictions in real-time, thus improving the accessibility and efficiency of animal identification tasks.
+
+---
+
+## 2. What technologies and tools did you use, and why?
+
+**Answer:**  
+I chose Python as the main programming language due to its extensive ecosystem for machine learning and image processing. The core deep learning model was implemented using TensorFlow and Keras, which provide powerful, flexible APIs to build and train convolutional neural networks. For preprocessing images, I used OpenCV to handle resizing and manipulation, and PIL (Python Imaging Library) to manage image file input/output. To connect the model running on a cloud environment (Google Colab) with a user-friendly web interface, I used Anvil’s Uplink service, which allows remote function calls between the Python backend and the frontend web app. Google Drive was used to store and load the trained model file (`vgg_model.h5`) securely. This combination enabled a seamless workflow from model training to deployment.
+
+---
+
+## 3. What challenges did you face during the project and how did you overcome them?
+
+**Answer:**  
+One of the significant challenges was ensuring that the input images sent from the frontend were processed exactly as the model expected. For instance, the images needed to be resized to 224x224 pixels and normalized using MobileNetV2’s specific preprocessing function. Initially, inconsistent preprocessing led to poor model performance. I overcame this by implementing a clear and consistent image preprocessing pipeline using OpenCV and TensorFlow’s `preprocess_input`. Another challenge was integrating the TensorFlow model backend hosted on Google Colab with the Anvil frontend. This required setting up a stable and secure connection using the Anvil Uplink service and handling remote calls asynchronously. Additionally, handling different image formats and network delays required implementing error handling and temporary file management to ensure smooth user experience.
+
+---
+
+## 4. How did you ensure the scalability and reliability of your project?
+
+**Answer:**  
+To ensure scalability, I designed the system with a clear separation of concerns: the frontend interface (Anvil app) handles user interaction, while the backend (running in Google Colab) processes the images and runs the model. This decoupling allows the backend to be upgraded or scaled independently, such as migrating the model to a more powerful cloud instance if needed. For reliability, I implemented exception handling around image loading and prediction calls to catch issues like corrupted files or network errors gracefully. The use of Anvil’s `@anvil.server.callable` functions helped maintain secure and manageable remote function calls. Finally, by storing the model weights in Google Drive, I ensured the model is persistently available and easy to update without interrupting the service.
+
+---
+
+## 5. Can you explain a specific module or function in your project and how it works?
+
+**Answer:**  
+A critical function in my project is the `prediksi(img)` function, responsible for classifying an input image and returning the predicted animal class. Here's how it works in detail:
+
+- **Image resizing:** The input image is resized to 224x224 pixels using OpenCV’s `cv2.resize()` method to match the input dimensions expected by the pretrained MobileNetV2 model.
+- **Array conversion and dimension expansion:** The resized image is converted into a NumPy array and expanded to include a batch dimension, as the model expects input shapes of `(batch_size, height, width, channels)`.
+- **Preprocessing:** The image array is normalized with TensorFlow’s `preprocess_input()` function, which adjusts pixel values to the scale and distribution the model was trained on.
+- **Prediction:** The preprocessed image is passed through the TensorFlow model using `model.predict()`, which outputs the probabilities for each animal class.
+- **Class selection:** The index with the highest prediction probability is selected using `np.argmax()`, and then mapped to a human-readable class name (e.g., 'horse', 'elephant', 'chicken', 'cat', or 'cow').
+
+This function is exposed to the Anvil frontend via the `@anvil.server.callable` decorator, allowing users to upload an image from the web app and receive real-time predictions from the model hosted on Google Colab.
+
+```python
+def prediksi(img):
+    img = cv2.resize(img, (224, 224))  # Resize to model's input size
+    img_array = np.array(img)
+    img_array = np.expand_dims(img_array, axis=0)  # Add batch dimension
+    img_array = preprocess_input(img_array)  # Normalize pixel values
+    pred = model.predict(img_array)  # Predict class probabilities
+    class_idx = np.argmax(pred, axis=1)[0]  # Get class with highest score
+    class_names = ['horse', 'elephant', 'chicken', 'cat', 'cow']
+    class_name = class_names[class_idx]
+    return class_name
+
 
