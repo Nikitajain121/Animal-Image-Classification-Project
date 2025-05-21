@@ -121,4 +121,51 @@ Because initial layers learn generic features; last layers adapt to the new data
 Use class weights, oversampling, or more data augmentation for minority classes.
 
 ---
+# Important Questions and Answers on Anvil + Colab + TensorFlow Integration
+
+---
+
+### 1. What is the purpose of `anvil-uplink` in this notebook, and how does it facilitate communication between Colab and an Anvil app?
+
+**Answer:**  
+`anvil-uplink` is a Python package that allows you to connect your Python environment (in this case, Google Colab) to an Anvil app via a secure connection. It enables you to run backend Python code remotely and call functions from the Anvil front-end (web UI). This setup allows the Colab environment to serve as a backend server that processes requests (like image classification) coming from the Anvil client app.
+
+---
+
+### 2. How does the function `prediksi(img)` preprocess an image before passing it to the model for prediction, and why is this preprocessing necessary?
+
+**Answer:**  
+The `prediksi(img)` function performs these preprocessing steps:  
+- Resizes the image to 224x224 pixels, which is the expected input size for the model.  
+- Converts the image into a NumPy array and expands its dimensions to add a batch size dimension (`np.expand_dims(img_array, axis=0)`), since the model expects batches of images.  
+- Applies MobileNetV2-specific preprocessing (`preprocess_input`), which scales pixel values and applies normalization as expected by the pretrained model.  
+
+These steps are necessary to ensure that the input image matches the input format, size, and pixel distribution that the model was trained on, leading to accurate predictions.
+
+---
+
+### 3. Explain the use of `@anvil.server.callable` decorator. How does it enable remote procedure calls from the Anvil front-end to the Colab backend?
+
+**Answer:**  
+The `@anvil.server.callable` decorator marks a Python function as callable from the Anvil client app. When the Anvil front-end calls this function, the request is sent to the connected Python backend (Colab in this case) over the `anvil-uplink` connection. The backend executes the function and returns the result to the client. This mechanism allows the frontend UI to trigger backend logic such as running the model prediction without exposing the code or model directly on the client side.
+
+---
+
+### 4. Why is the model loaded from Google Drive using `load_model('/content/drive/MyDrive/vgg_model.h5')` and how can you ensure the model file path is correctly accessible during runtime?
+
+**Answer:**  
+The model is loaded from Google Drive to persist the trained weights and architecture outside of the ephemeral Colab session, allowing reuse without retraining. Mounting Google Drive (`drive.mount('/content/drive')`) provides access to stored files in the user's Drive account. To ensure the model path is correct during runtime:  
+- The Drive must be mounted successfully before accessing the file.  
+- The exact file path must match the Drive's folder structure.  
+- The file should be uploaded to the specified Drive location prior to running the notebook.
+
+---
+
+### 5. In the `classify_image(file)` function, why is the image converted using `anvil.media.TempFile(file)` and how is the image passed from Anvil to the TensorFlow model for classification?
+
+**Answer:**  
+`anvil.media.TempFile(file)` is used to create a temporary local file from the media object received from the Anvil client. This step is necessary because the uploaded file from Anvil is not a normal file but a special media object. Converting it to a temp file allows the use of standard Python libraries (like PIL) to open and process the image. The image is then converted to a NumPy array and passed to the `prediksi(img)` function, which preprocesses the image and feeds it into the TensorFlow model to get the predicted class.
+
+---
+
 
